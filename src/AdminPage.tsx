@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db, auth, signInWithGoogle, handleFirestoreError, OperationType } from '@/src/lib/firebase';
+import { db, handleFirestoreError, OperationType } from '@/src/lib/firebase';
 import { Order, OrderStatus } from '@/src/types';
 import { motion, AnimatePresence } from 'motion/react';
-import { LogIn, LogOut, Clock, CheckCircle, XCircle, Hammer, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Hammer, ChevronDown, ChevronUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/src/lib/utils';
 
 export default function AdminPage() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [user, setUser] = useState(auth.currentUser);
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all');
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged((u) => {
-      setUser(u);
-    });
-
     const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
     const unsubscribeOrders = onSnapshot(q, (snapshot) => {
       const ords = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
@@ -27,7 +22,6 @@ export default function AdminPage() {
     });
 
     return () => {
-      unsubscribeAuth();
       unsubscribeOrders();
     };
   }, []);
@@ -66,34 +60,6 @@ export default function AdminPage() {
     });
   };
 
-  if (!user || user.email !== "themoonforget@gmail.com") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white p-12 rounded-3xl shadow-2xl max-w-sm w-full text-center"
-        >
-          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <LogIn size={40} className="text-amber-500" />
-          </div>
-          <h2 className="text-2xl font-black text-gray-900 mb-2">後台管理系統</h2>
-          <p className="text-gray-500 font-medium mb-8">請先登入後繼續管理訂單</p>
-          <button 
-            onClick={signInWithGoogle}
-            className="w-full bg-amber-500 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg shadow-amber-200"
-          >
-            Google登入
-          </button>
-          
-          {user && (
-            <p className="text-red-500 text-xs mt-4 font-bold">目前登入帳號無管理權限: {user.email}</p>
-          )}
-        </motion.div>
-      </div>
-    );
-  }
-
   const filteredOrders = orders.filter(o => filter === 'all' || o.status === filter);
 
   const statusConfig: Record<OrderStatus, { icon: any, color: string, label: string }> = {
@@ -121,10 +87,6 @@ export default function AdminPage() {
               className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition-all"
             >
               初始化菜單
-            </button>
-            <span className="text-xs font-bold text-gray-400 hidden sm:block">{user.email}</span>
-            <button onClick={() => auth.signOut()} className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
-              <LogOut size={20} />
             </button>
           </div>
         </div>

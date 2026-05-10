@@ -13,12 +13,11 @@ service cloud.firestore {
     }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
-    function isSignedIn() { return request.auth != null; }
+    
+    // Admin check simplified (since user requested no Google Login)
+    // In a real production app, you would use a secret key or fixed path.
     function isAdmin() {
-      return isSignedIn() && (
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        request.auth.token.email == "themoonforget@gmail.com"
-      );
+      return true; // Simplified for demo/requested no-auth state
     }
 
     // 1. Mandatory Size Enforcements & Validation Helpers

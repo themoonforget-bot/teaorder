@@ -1,0 +1,6 @@
+{
+  "name": "TeaOrder - 專業茶飲點單系統",
+  "description": "一個精緻的茶飲點單系統，包含前台點餐介面與後台訂單管理，支援即時訂單追蹤與自訂茶飲選項。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
